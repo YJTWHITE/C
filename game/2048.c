@@ -1,7 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
-//只移動了一格QAQ 
+//Bug : Can't check user input instruction that is allowed.
 int game[4][4];
 
 void new_game();
@@ -43,8 +43,8 @@ void generation_num(){
 		j=rand()%4;
 		if(game[i][j]==0){
 			game[i][j]=(rand()%2+1)*2;
-			printf("\n(%2d,%2d)",i,j);
-			system("pause");
+			//printf("\n(%2d,%2d)",i,j);
+			//system("pause");
 			break;
 		}
 	}
@@ -75,127 +75,194 @@ void instruction(){
 			
 }
 
+// count_list use tool
+void clear_count_list(int*);
+void write_count_list(int,int,int*);//(left or right, current_XorY_axis, list_array)
+int count_zero(int*);
+void move_list(int,int,int*); //(left or right, zero number, list_array)
+void count(int,int*); //(left or right,list_array)
+void writeback_array(int,int,int*);
+
+
 void count_section(char inst){
 	int i=0,j=0,z=0;
-	int count_list[4]={0,0,0,0};
-	
+	int zero_number=0;
+	int count_list[4];
+		
 	switch(inst){
 		case 'w':
+			clear_count_list(count_list);
 			for(i=0;i<4;i++){
-				//write_count_list
-				for(j=0;j<4;j++){
-					count_list[j]=game[j][i];
-				}
-				//count
-				for(j=0;j<4;j++){
-					if(count_list[j]!=0&&j>0){
-						for(z=0;z<3;z++){
-							if((count_list[z]==count_list[z+1])||(count_list[z]==0)){
-								count_list[z]=count_list[z]+count_list[z+1];
-								count_list[z+1]=0;
-							}
-						}
-					}
-				}				
-				//writeback_array
-				for(j=0;j<4;j++){
-					game[j][i]=count_list[j];
-				}
+		
+				write_count_list(0,i,count_list);
+				zero_number = count_zero(count_list);
+				move_list(0,zero_number,count_list);
+				count(0,count_list);
+				move_list(0,zero_number,count_list);
+				writeback_array(0,i,count_list);
+				clear_count_list(count_list);
 				
-				//clear count_list
-				for(j=0;j<4;j++){					
-					count_list[j]=0;	
-				}
 			}
 			break;
 		case 's':
+			clear_count_list(count_list);
 			for(i=0;i<4;i++){
-				//write_count_list
-				for(j=0;j<4;j++){
-					count_list[j]=game[j][i];
-				}
-				//count
-				for(j=0;j<4;j++){
-					if(count_list[j]!=0&&j>0){
-						for(z=3;z<0;z--){
-							if((count_list[z]==count_list[z-1])||(count_list[z]==0)){
-								count_list[z]=count_list[z]+count_list[z-1];
-								count_list[z-1]=0;
-							}
-						}
-					}
-				}				
-				//writeback_array
-				for(j=0;j<4;j++){
-					game[j][i]=count_list[j];
-				}
+		
+				write_count_list(0,i,count_list);
+				zero_number = count_zero(count_list);
+				move_list(1,zero_number,count_list);
+				count(1,count_list);
+				move_list(1,zero_number,count_list);
+				writeback_array(0,i,count_list);
+				clear_count_list(count_list);
 				
-				//clear count_list
-				for(j=0;j<4;j++){					
-					count_list[j]=0;	
-				}
 			}
 			break;
 		case 'a':
+			clear_count_list(count_list);
 			for(i=0;i<4;i++){
-				//write_count_list
-				for(j=0;j<4;j++){
-					count_list[j]=game[i][j];
-				}
-				//count
-				for(j=0;j<4;j++){
-					if(count_list[j]!=0&&j>0){
-						for(z=0;z<3;z++){
-							if((count_list[z]==count_list[z+1])||(count_list[z]==0)){
-								count_list[z]=count_list[z]+count_list[z+1];
-								count_list[z+1]=0;
-							}
-						}
-					}
-				}				
-				//writeback_array
-				for(j=0;j<4;j++){
-					game[i][j]=count_list[j];
-				}
+		
+				write_count_list(1,i,count_list);
+				zero_number = count_zero(count_list);
+				move_list(0,zero_number,count_list);
+				count(0,count_list);
+				move_list(0,zero_number,count_list);
+				writeback_array(1,i,count_list);
+				clear_count_list(count_list);
 				
-				//clear count_list
-				for(j=0;j<4;j++){					
-					count_list[j]=0;	
-				}
 			}
 			break;
 		case 'd':
+			clear_count_list(count_list);
 			for(i=0;i<4;i++){
-				//write_count_list
-				for(j=0;j<4;j++){
-					count_list[j]=game[i][j];
-				}
-				//count
-				for(j=0;j<4;j++){
-					if(count_list[j]!=0&&j>0){
-						for(z=3;z<0;z--){
-							if((count_list[z]==count_list[z-1])||(count_list[z]==0)){
-								count_list[z]=count_list[z]+count_list[z-1];
-								count_list[z-1]=0;
-							}
-						}
-					}
-				}				
-				//writeback_array
-				for(j=0;j<4;j++){
-					game[i][j]=count_list[j];
-				}
+		
+				write_count_list(1,i,count_list);
+				zero_number = count_zero(count_list);
+				move_list(1,zero_number,count_list);
+				count(1,count_list);
+				move_list(1,zero_number,count_list);
+				writeback_array(1,i,count_list);
+				clear_count_list(count_list);
 				
-				//clear count_list
-				for(j=0;j<4;j++){					
-					count_list[j]=0;	
-				}
 			}
 			break;
 		default:
 			break;	
+	}		
+}
+
+void clear_count_list(int* list){
+	int j=0;
+	for(j=0;j<4;j++){					
+		list[j]=0;	
 	}
-	
-	
+}
+
+void write_count_list(int type,int axis,int* list){
+	int j=0;
+	//colume
+	if(type==0){
+		for(j=0;j<4;j++){
+			list[j]=game[j][axis];
+		}
+	}
+	//row
+	else{
+		for(j=0;j<4;j++){
+			list[j]=game[axis][j];
+		}
+	}
+}
+
+int count_zero(int* list){
+	int i=0,zero_number=0;
+	for(i=0;i<4;i++){
+		if(list[i]==0){
+			zero_number=zero_number+1; 
+		}
+	}
+	return zero_number;
+}
+
+void move_list(int type,int zero_number,int* count_list){
+	int i=0,j=0,z=0;
+	int temp=0;
+	if(type==0){
+		if(zero_number==4){
+			
+		}
+		else{
+			j=0;
+			for(;zero_number>0;zero_number--){
+				for(i=j;i<4;i++){
+					if(count_list[i]==0){
+						for(z=0;z<3;z++){
+							if(count_list[z]==0){
+								temp = count_list[z];
+								count_list[z]=count_list[z+1];
+								count_list[z+1]=temp;
+							}
+						}
+					}					
+				}
+			}
+		}
+	}
+	else{
+		if(zero_number==4){
+		
+		}
+		else{
+			j=0;
+			for(;zero_number>0;zero_number--){
+				for(i=j;i<4;i++){
+					if(count_list[i]==0){
+						for(z=3;z>0;z--){
+							if(count_list[z]==0){
+								temp = count_list[z-1];
+								count_list[z-1]=count_list[z];
+								count_list[z]=temp;
+							}
+						}
+					}					
+				}
+			}
+		}
+	}
+}
+
+void count(int type,int* count_list){
+	int z=0;
+	if(type==0){			
+		for(z=0;z<3;z++){
+			if(count_list[z]==count_list[z+1]){
+				count_list[z]=count_list[z]+count_list[z+1];
+				count_list[z+1]=0;
+			}
+		}
+	}
+	else{					
+		for(z=3;z>0;z--){
+			if(count_list[z]==count_list[z-1]){
+				count_list[z]=count_list[z]+count_list[z-1];
+				count_list[z-1]=0;
+			}
+		}
+
+	}
+}
+
+void writeback_array(int type,int axis,int* count_list){
+	int j=0;
+	if(type==0){
+		for(j=0;j<4;j++){
+			game[j][axis]=count_list[j];
+		}
+	}
+	else{
+		for(j=0;j<4;j++){
+			game[axis][j]=count_list[j];
+		}
+	}
 }
 
